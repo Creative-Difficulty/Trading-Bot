@@ -42,8 +42,8 @@ export class TradingAPI {
             }
         });
         const parsedResponse = JSON.parse(JSON.stringify(await response2.json()));
-        const accountArray = parsedResponse["accounts"]
-        accountArray.forEach(async account => {
+        const accountArray: Array<{ accountName: string, preferred: boolean, accountId: string }> = parsedResponse["accounts"]
+        accountArray.forEach(async (account: { accountName: string, preferred: boolean, accountId: string }) => {
             if(account.accountName === "LuxAlgo-Test" && account.preferred === true) {
                 this.accountId = account.accountId;
                 logger.info("Logged in!");
