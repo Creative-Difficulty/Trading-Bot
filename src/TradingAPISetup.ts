@@ -1,9 +1,17 @@
+import { logger } from "./index.js"
+
 export class TradingAPI {
-    constructor(email, password, apiKey) {
+    email: string;
+    password: string;
+    apiKey: string;
+    capitalcomCST: string;
+    capitalcomSecurityToken: string;
+    accountId: string;
+
+    constructor(email: string, password: string, apiKey: string) {
         this.email = email
         this.password = password
         this.apiKey = apiKey
-
     }
 
     async init() {
@@ -38,10 +46,10 @@ export class TradingAPI {
         accountArray.forEach(async account => {
             if(account.accountName === "LuxAlgo-Test" && account.preferred === true) {
                 this.accountId = account.accountId;
-                console.log("Logged in!");
+                logger.info("Logged in!");
                 return;
             } else {
-                console.log("logging in...")
+                logger.info("logging in...")
                 await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
                     method: "PUT",
                     headers: {
@@ -53,13 +61,13 @@ export class TradingAPI {
                         "accountId": this.accountId
                     })
                 });
-                console.log("Logged in!");
+                logger.info("Logged in!");
             }
         });
         
     }
 
-    async openTrade(direction, stopLoss, takeProfit) {
+    async openTrade(direction: string) {
         const response = await fetch("https://demo-api-capital.backend-capital.com/api/v1/positions", {
             method: "POST",
             headers: {
@@ -70,13 +78,12 @@ export class TradingAPI {
             body: JSON.stringify({
                 "epic": "BTCUSD",
                 "direction": direction,
-                "size": 0.01,
-                "guaranteedStop": false,
-                "stopLevel": stopLoss,
-                "profitLevel": takeProfit
+                "size": 0.01
             })
         });
-        return response.json();
+        const respJSON = await response.json();
+        const parsedResponse = JSON.parse(JSON.stringify(respJSON));
+        return parsedResponse;
     }
 
     async closeTrade(tradeId) {
@@ -88,7 +95,9 @@ export class TradingAPI {
                 "Content-Type" : "application/json"
             }
         });
-        return response.json();
+        const respJSON = await response.json();
+        const parsedResponse = JSON.stringify(respJSON);
+        return parsedResponse;
     }
 
     async getAccountLiquidity() {
@@ -113,7 +122,7 @@ export class TradingAPI {
         return accountBalance;
     }
 
-    async getOpenTrades() {
+    async getOpenTrades(direction: "BUY" | "SELL" | "ALL"): Promise<Array<string>> {
         const response = await fetch("https://demo-api-capital.backend-capital.com/api/v1/positions", {
             method: "GET",
             headers: {
@@ -122,19 +131,18 @@ export class TradingAPI {
                 "Content-Type" : "application/json"
             }
         });
-        const parsedPositions = JSON.parse(JSON.stringify(await response.json()))["positions"];
-        var dealIdArray = [];
-        if(parsedPositions.length !== 0) {
-            parsedPositions.forEach(position => {
-                console.log(position["position"])
-                dealIdArray.push({
-                    dealId: position["position"]["dealReference"],
-                    direction: position["position"]["direction"]
-                })
-            });
-        } else {
-            return 0;
-        }
+        const respJSON = await response.json();
+        const parsedPositions: Array<{ position: { position: {dealReference: string, direction: string} } }> = JSON.parse(JSON.stringify(respJSON))["positions"];
+        var dealIdArray: Array<string> = [];
+        parsedPositions.forEach(async position => {
+            if(direction === "ALL") {
+                dealIdArray.push(position["position"]["dealId"]) 
+            }
+
+            if(position["position"]["direction"] === direction) {
+                dealIdArray.push(position["position"]["dealId"]) 
+            }
+        });
         return dealIdArray;
     }
 }
