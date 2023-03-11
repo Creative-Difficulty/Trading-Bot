@@ -74,4 +74,4 @@ async function monitorTrades() {
     logger.info(`Currently open trades: ${openTrades}`)
 }
 
-fastify.listen({ port: 3000 })
+fastify.listen({ port: 3000 }, "0.0.0.0");
