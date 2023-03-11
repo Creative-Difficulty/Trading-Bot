@@ -1,4 +1,4 @@
-import Fastify, { FastifyRequest } from 'fastify';
+import Fastify from 'fastify';
 import * as dotenv from "dotenv";
 import { TradingAPI } from "./TradingAPISetup.js";
 import { getDirectionFromAlert } from "./analyseAlert.js";
@@ -74,4 +74,4 @@ async function monitorTrades() {
     logger.info(`Currently open trades: ${openTrades}`)
 }
 
-fastify.listen({ port: 3000 }, "0.0.0.0");
+fastify.listen({port: 3000, host: "0.0.0.0"})
