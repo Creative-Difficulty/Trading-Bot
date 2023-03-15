@@ -34,7 +34,7 @@ export class TradingAPI {
         const capitalcomSecurityToken = capitalcomSessionInitHeaders["x-security-token"];
         this.capitalcomCST = capitalcomCST;
         this.capitalcomSecurityToken = capitalcomSecurityToken;
-        
+
         var accountIdToLogin = "175768302479824030";
         if(this.env === "TEST") {
             accountIdToLogin = "175996584286573726";
@@ -49,7 +49,7 @@ export class TradingAPI {
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify({
-                "accountId": "175768302479824030"
+                "accountId": accountIdToLogin
             })
         });
         logger.info("Logged in!");
