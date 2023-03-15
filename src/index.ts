@@ -23,7 +23,7 @@ dotenv.config();
 
 const fastify = Fastify({logger: logger});
 
-const capitalcomAPI = new TradingAPI(process.env.EMAIL, process.env.PASSWORD, process.env.APIKEY)
+const capitalcomAPI = new TradingAPI(process.env.EMAIL, process.env.PASSWORD, process.env.APIKEY, process.env.ENV)
 await capitalcomAPI.init();
 
 fastify.post('/', async function (request, reply) {

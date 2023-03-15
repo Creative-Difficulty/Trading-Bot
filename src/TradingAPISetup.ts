@@ -7,11 +7,13 @@ export class TradingAPI {
     capitalcomCST: string;
     capitalcomSecurityToken: string;
     accountId: string;
+    env: string;
 
-    constructor(email: string, password: string, apiKey: string) {
-        this.email = email
-        this.password = password
-        this.apiKey = apiKey
+    constructor(email: string, password: string, apiKey: string, envType: string) {
+        this.email = email;
+        this.password = password;
+        this.apiKey = apiKey;
+        this.env = envType;
     }
 
     async init() {
@@ -32,6 +34,11 @@ export class TradingAPI {
         const capitalcomSecurityToken = capitalcomSessionInitHeaders["x-security-token"];
         this.capitalcomCST = capitalcomCST;
         this.capitalcomSecurityToken = capitalcomSecurityToken;
+        
+        var accountIdToLogin = "175768302479824030";
+        if(this.env === "TEST") {
+            accountIdToLogin = "175996584286573726";
+        }
 
         logger.info("logging in...")
         await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
