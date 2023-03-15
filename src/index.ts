@@ -37,41 +37,29 @@ fastify.post('/', async function (request, reply) {
     if(tradeDirection["action"] === "ENTER" && tradeDirection["direction"] === "SELL") { const dealId = await capitalcomAPI.openTrade("SELL"); logger.info(`Opened short trade with ID: ${dealId["dealReference"]}`) }
     if(tradeDirection["action"] === "EXIT" && tradeDirection["direction"] === "BUY") {
         const openTrades = await capitalcomAPI.getOpenTrades("BUY");
-        var exitedTrades: Array<string> = [];
         if(openTrades.length === 0) { 
             logger.info("No open long trades to exit");
         } else {
             openTrades.forEach(async trade => {
                 const resp = await capitalcomAPI.closeTrade(trade); 
                 logger.info(`Closed long trade with id ${trade}: ${resp}`)
-                exitedTrades.push(trade);
             });
-            logger.info(`Exited all long trades: \n${exitedTrades}\n`)
         }
     }
 
     if(tradeDirection["action"] === "EXIT" && tradeDirection["direction"] === "SELL") {
         const openTrades = await capitalcomAPI.getOpenTrades("SELL");
-        var exitedTrades: Array<string> = [];
         if(openTrades.length === 0) { 
             logger.info("No open short trades to exit");
         } else {
             openTrades.forEach(async trade => {
                 const resp = await capitalcomAPI.closeTrade(trade); 
                 logger.info(`Closed short trade with id ${trade}: ${resp}`)
-                exitedTrades.push(trade);
             });
-            logger.info(`Exited all short trades: \n${exitedTrades}\n`)
         }
     }
 
-    
     reply.send({ status: "recieved" })
 })
-
-async function monitorTrades() {
-    const openTrades = await capitalcomAPI.getOpenTrades("ALL");
-    logger.info(`Currently open trades: ${openTrades}`)
-}
 
 fastify.listen({port: 3000, host: "0.0.0.0"})

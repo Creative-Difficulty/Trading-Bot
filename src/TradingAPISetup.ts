@@ -37,11 +37,13 @@ export class TradingAPI {
 
         var accountIdToLogin = "175768302479824030";
         if(this.env === "TEST") {
+            logger.info("Using Test account.");
             accountIdToLogin = "175996584286573726";
+        } else {
+            logger.info("Using Backtesting account.");
         }
-
-        logger.info("logging in...")
-        await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
+        logger.info("Logging in...")
+        const response2 = await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
             method: "PUT",
             headers: {
                 "X-SECURITY-TOKEN": capitalcomSecurityToken,
@@ -52,6 +54,10 @@ export class TradingAPI {
                 "accountId": accountIdToLogin
             })
         });
+        const respJSON = await response2.json();
+        const parsedResponse = JSON.parse(JSON.stringify(respJSON));
+        if(parsedResponse.errorCode === "error.not-different.accountId") { logger.info("Already logged in."); return; }
+        if(parsedResponse.errorCode === "error.invalid.accountId") { logger.error("Inavlid account Id"); return; }
         logger.info("Logged in!");
     }
 
