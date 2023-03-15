@@ -33,38 +33,19 @@ export class TradingAPI {
         this.capitalcomCST = capitalcomCST;
         this.capitalcomSecurityToken = capitalcomSecurityToken;
 
-        const response2 = await fetch("https://demo-api-capital.backend-capital.com/api/v1/accounts", {
-            method: "GET",
+        logger.info("logging in...")
+        await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
+            method: "PUT",
             headers: {
                 "X-SECURITY-TOKEN": capitalcomSecurityToken,
                 "CST": capitalcomCST,
                 "Content-Type" : "application/json"
-            }
+            },
+            body: JSON.stringify({
+                "accountId": "175768302479824030"
+            })
         });
-        const parsedResponse = JSON.parse(JSON.stringify(await response2.json()));
-        const accountArray: Array<{ accountName: string, preferred: boolean, accountId: string }> = parsedResponse["accounts"]
-        accountArray.forEach(async (account: { accountName: string, preferred: boolean, accountId: string }) => {
-            if(account.accountName === "LuxAlgo-Backtest" && account.preferred === true) {
-                this.accountId = account.accountId;
-                logger.info("Logged in!");
-                return;
-            } else {
-                logger.info("logging in...")
-                await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
-                    method: "PUT",
-                    headers: {
-                        "X-SECURITY-TOKEN": capitalcomSecurityToken,
-                        "CST": capitalcomCST,
-                        "Content-Type" : "application/json"
-                    },
-                    body: JSON.stringify({
-                        "accountId": this.accountId
-                    })
-                });
-                logger.info("Logged in!");
-            }
-        });
-        
+        logger.info("Logged in!");
     }
 
     async openTrade(direction: string) {
