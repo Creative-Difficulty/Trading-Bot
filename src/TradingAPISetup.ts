@@ -59,6 +59,17 @@ export class TradingAPI {
         if(parsedResponse.errorCode === "error.not-different.accountId") { logger.info("Already logged in."); return; }
         if(parsedResponse.errorCode === "error.invalid.accountId") { logger.error("Inavlid account Id"); return; }
         logger.info("Logged in!");
+
+        setInterval(async () => {
+            await fetch("https://demo-api-capital.backend-capital.com/api/v1/accounts", {
+                method: "GET",
+                headers: {
+                    "X-SECURITY-TOKEN": this.capitalcomSecurityToken,
+                    "CST": this.capitalcomCST,
+                    "Content-Type" : "application/json"
+                }
+            });
+        }, 540000);
     }
 
     async openTrade(direction: string) {
