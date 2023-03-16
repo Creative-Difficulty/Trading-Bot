@@ -69,6 +69,7 @@ export class TradingAPI {
                     "Content-Type" : "application/json"
                 }
             });
+            logger.info("Refreshed access token validity.");
         }, 540000);
     }
 
