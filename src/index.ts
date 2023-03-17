@@ -16,7 +16,8 @@ export const logger = pino({
             { level:"debug", target: "pino/file", options: { destination: logPath, mkdir: true } },
             { level: "debug", target: "pino/file", options: { } }
         ]
-    }
+    },
+    timestamp: pino.stdTimeFunctions.isoTime
 });
 
 dotenv.config();

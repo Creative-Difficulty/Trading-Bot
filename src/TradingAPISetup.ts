@@ -61,15 +61,24 @@ export class TradingAPI {
         logger.info("Logged in!");
 
         setInterval(async () => {
-            await fetch("https://demo-api-capital.backend-capital.com/api/v1/accounts", {
-                method: "GET",
+            const response1 = await fetch("https://demo-api-capital.backend-capital.com/api/v1/session", {
+                method: "POST",
                 headers: {
-                    "X-SECURITY-TOKEN": this.capitalcomSecurityToken,
-                    "CST": this.capitalcomCST,
+                    "X-CAP-API-KEY": this.apiKey,
                     "Content-Type" : "application/json"
-                }
+                },
+                body: JSON.stringify({
+                    "identifier": this.email,
+                    "password": this.password
+                })
             });
-            logger.info("Refreshed access token validity.");
+
+            const capitalcomSessionInitHeaders = Object.fromEntries(response1.headers);
+            const capitalcomCST = capitalcomSessionInitHeaders["cst"];
+            const capitalcomSecurityToken = capitalcomSessionInitHeaders["x-security-token"];
+            this.capitalcomCST = capitalcomCST;
+            this.capitalcomSecurityToken = capitalcomSecurityToken;
+            logger.info("Refreshed access token.");
         }, 540000);
     }
 
