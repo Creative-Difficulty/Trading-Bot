@@ -1,54 +1,31 @@
 import { logger, capitalcomAPI } from "./index.js"
-export async function executeTrade(tradeDirection: { action: string, direction: string }) {
-    // const formalTradeDirection = tradeDirection.direction === "BUY" ? "long" : "short";
-    if(tradeDirection["action"] === "ENTER" && tradeDirection["direction"] === "BUY") { 
-        const openTrades = await capitalcomAPI.getOpenTrades("SELL");
+export async function executeTrade(tradeDirection: { action: "ENTER" | "EXIT", direction: "BUY" | "SELL" }) {
+    const formalTradeDirection: "long" | "short" = tradeDirection.direction === "BUY" ? "long" : "short";
+    const reversedFormalTradeDirection: "long" | "short" = formalTradeDirection === "long" ? "short" : "long";
+    const reversedTradeDirection: "BUY" | "SELL" = tradeDirection.direction === "BUY" ? "SELL" : "BUY";
+
+    if(tradeDirection["action"] === "ENTER") {
+        const openTrades = await capitalcomAPI.getOpenTrades(reversedTradeDirection);
         if(openTrades.length === 0) { 
-            logger.info("No open short trades to exit");
+            logger.info(`No open ${reversedFormalTradeDirection} trades to exit.`);
         } else {
             openTrades.forEach(async trade => {
                 const resp = await capitalcomAPI.closeTrade(trade); 
-                logger.info(`Closed short trade because of long signal with id ${trade}: ${resp}`);
+                logger.info(`Closed ${reversedFormalTradeDirection} trade because of ${formalTradeDirection} signal with id ${trade}: ${resp}`);
             });
         }
-        const dealId = await capitalcomAPI.openTrade("BUY"); 
-        logger.info(`Opened long trade with ID: ${dealId["dealReference"]}`) 
+        const dealReference = await capitalcomAPI.openTrade(tradeDirection.direction);
+        logger.info(`Opened ${formalTradeDirection} trade with ID: ${dealReference["dealReference"]}`) 
     }
 
-    if(tradeDirection["action"] === "ENTER" && tradeDirection["direction"] === "SELL") { 
-        const openTrades = await capitalcomAPI.getOpenTrades("BUY");
-        if(openTrades.length === 0) { 
-            logger.info("No open long trades to exit");
+    if(tradeDirection["action"] === "EXIT") {
+        const openTrades = await capitalcomAPI.getOpenTrades(tradeDirection.direction);
+        if(openTrades.length === 0) {
+            logger.info(`No open ${formalTradeDirection} trades to exit.`);
         } else {
             openTrades.forEach(async trade => {
                 const resp = await capitalcomAPI.closeTrade(trade); 
-                logger.info(`Closed long trade because of short signal with id ${trade}: ${resp}`);
-            });
-        }
-        const dealId = await capitalcomAPI.openTrade("SELL");
-        logger.info(`Opened short trade with ID: ${dealId["dealReference"]}`);
-    }
-    
-    if(tradeDirection["action"] === "EXIT" && tradeDirection["direction"] === "BUY") {
-        const openTrades = await capitalcomAPI.getOpenTrades("BUY");
-        if(openTrades.length === 0) { 
-            logger.info("No open long trades to exit");
-        } else {
-            openTrades.forEach(async trade => {
-                const resp = await capitalcomAPI.closeTrade(trade); 
-                logger.info(`Closed long trade with id ${trade}: ${resp}`)
-            });
-        }
-    }
-
-    if(tradeDirection["action"] === "EXIT" && tradeDirection["direction"] === "SELL") {
-        const openTrades = await capitalcomAPI.getOpenTrades("SELL");
-        if(openTrades.length === 0) { 
-            logger.info("No open short trades to exit");
-        } else {
-            openTrades.forEach(async trade => {
-                const resp = await capitalcomAPI.closeTrade(trade); 
-                logger.info(`Closed short trade with id ${trade}: ${resp}`)
+                logger.info(`Closed ${formalTradeDirection} trade because of exit signal with id ${trade}: ${resp}`);
             });
         }
     }

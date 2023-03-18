@@ -55,9 +55,8 @@ export class TradingAPI {
             })
         });
         const respJSON = await response2.json();
-        const parsedResponse = JSON.parse(JSON.stringify(respJSON));
-        if(parsedResponse.errorCode === "error.not-different.accountId") { logger.info("Already logged in."); return; }
-        if(parsedResponse.errorCode === "error.invalid.accountId") { logger.error("Inavlid account Id"); return; }
+        if(respJSON.errorCode === "error.not-different.accountId") { logger.info("Already logged in."); return; }
+        if(respJSON.errorCode === "error.invalid.accountId") { logger.error("Inavlid account Id"); return; }
         logger.info("Logged in!");
 
         setInterval(async () => {
@@ -97,8 +96,7 @@ export class TradingAPI {
             })
         });
         const respJSON = await response.json();
-        const parsedResponse = JSON.parse(JSON.stringify(respJSON));
-        return parsedResponse;
+        return respJSON;
     }
 
     async closeTrade(tradeId) {
@@ -124,10 +122,12 @@ export class TradingAPI {
                 "Content-Type" : "application/json"
             }
         });
-        var accountBalance;
-        const parsedResponse = JSON.parse(JSON.stringify(await response.json()));
-        const accountArray = parsedResponse["accounts"]
-        accountArray.forEach(async account => {
+        
+        //TODO: Fix balance type
+        var accountBalance: any;
+        const respJSON = await response.json();
+        const accountArray = respJSON["accounts"]
+        accountArray.forEach(async (account: { accountName: string; balance: any; }) => {
             if(account.accountName === "LuxAlgo-Test") {
                 accountBalance = account.balance;
                 return;
@@ -147,7 +147,7 @@ export class TradingAPI {
             }
         });
         const respJSON = await response.json();
-        const parsedPositions: Array<{ position: { position: {dealReference: string, direction: string} } }> = JSON.parse(JSON.stringify(respJSON))["positions"];
+        const parsedPositions: Array<{ position: { position: { dealReference: string, direction: string } } }> = respJSON["positions"];
         var dealIdArray: Array<string> = [];
         parsedPositions.forEach(async position => {
             if(direction === "ALL") {
